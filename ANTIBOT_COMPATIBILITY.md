@@ -35,6 +35,112 @@ Follow-up observation on 2026-07-29:
 
 This follow-up separates the original userscript isolation defect from challenge completion. The script can guarantee that it stays out of the verification document; it cannot guarantee that Cloudflare accepts a browser or network.
 
+## Follow-up RCA: stale installation plus Brave Shields
+
+A second investigation on 2026-07-29 found two simultaneous client-side faults.
+
+### Fault 1: the released fix was not installed
+
+Tampermonkey's live extension database still reported:
+
+- installed version: `2.0.8`;
+- canonical update/download URL: the repository's `main` raw userscript;
+- automatic update checks: enabled; and
+- last script modification: before versions 2.0.9 through 2.0.11 were released.
+
+Opening the raw userscript did not update the installed copy until Tampermonkey's
+explicit **Update/Reinstall** action was accepted. The installed metadata was
+then rechecked and reported version `2.0.11`.
+
+The Tampermonkey popup's green enabled switch is not evidence that the current
+release is installed. It only means that a script's metadata matches the current
+URL and the script is enabled. Likewise, absence of the AutoNext badge is not
+proof that an old script is safe: version 2.0.8 uses `document-idle`, and a
+challenge document that never finishes loading can delay the old controller
+before its badge appears.
+
+### Fault 2: Brave modified signals required by Cloudflare
+
+The failing Brave tab showed all of the following:
+
+- **Shields up for this site**;
+- **Block fingerprinting** enabled;
+- third-party cookies blocked; and
+- the Cloudflare challenge repeatedly restarted with a new Ray ID.
+
+Cloudflare documents that extensions or browser protections which modify
+`Canvas`, `WebGL`, user-agent data, or other Web APIs are incompatible with
+Challenges. Brave documents that fingerprinting protection can break some
+sites and should be disabled per site when that occurs.
+
+### Controls and exclusions
+
+The investigation also established:
+
+- Brave `1.92.144` was the current stable release, ruling out browser age.
+- Windows time synchronization was healthy.
+- No system proxy or active VPN connection was configured.
+- Cloudflare WARP and Gateway were off for the connection.
+- The configured filtering DNS resolved both AnimePahe and Cloudflare's
+  challenge host correctly.
+- Cloudflare reported both **Challenge Platform** and **Turnstile** operational.
+- A clean Microsoft Edge InPrivate window on the same computer and network
+  reached the real AnimePahe site.
+
+The successful Edge control rules out an AnimePahe outage, a general network
+failure, DNS resolution failure, system-clock failure, and an IP-wide block.
+The remaining failure domain is the Brave profile.
+
+### Verified recovery result
+
+The complete supported Brave recovery sequence was executed on 2026-07-29:
+
+- the live Shields toggle changed from **On** to **Off**;
+- Brave persisted a site-only `animepahe.pw` Shields exception;
+- only AnimePahe's five cookies and site data were deleted;
+- the site-only Shields exception remained intact after deletion; and
+- one fresh verification attempt was allowed to run for 45 seconds without
+  repeated refreshes.
+
+Brave still remained on `Just a moment...`. A separate clean Chromium session
+without Tampermonkey also remained on the verification document, while Edge
+InPrivate reached the real AnimePahe application on the same machine and
+network.
+
+This is decisive isolation evidence: version 2.0.11 is not participating in the
+remaining loop, and further userscript timing, pointer, keyboard, fingerprint,
+cookie, or challenge-token changes cannot repair it. The working recovery is a
+current browser that Cloudflare accepts for this visitor. Edge was the verified
+working browser in this incident; a different Brave profile may be tested, but
+is not a guaranteed remedy.
+
+### Correct recovery order
+
+1. Open the canonical raw userscript and accept Tampermonkey's
+   **Update/Reinstall** action.
+2. Verify the installed metadata says version `2.0.11` or newer.
+3. In Brave's site-specific Shields panel for `animepahe.pw`, turn the main
+   Shields toggle down. This also removes fingerprinting mutations from the
+   challenge test.
+4. Reload once and wait. Repeated refreshes restart verification and create new
+   challenge sessions.
+5. If necessary, clear only AnimePahe's site data, reopen the site, and allow a
+   fresh clearance cookie to be issued.
+6. Use a clean supported browser as a control. If that browser succeeds, do not
+   change system DNS, routing, or the userscript again; continue isolating the
+   failing browser profile or use the successful browser.
+7. If every current supported browser fails on more than one stable network,
+   retain the Ray ID and contact the site operator. Only the site owner can
+   change Cloudflare WAF rules or challenge policy.
+
+Do not copy clearance cookies between browsers or devices, automate the
+challenge, use headless-browser bypass tools, or replay challenge tokens.
+Cloudflare binds clearance to the visitor and device, and explicitly treats
+browser automation as unsupported traffic.
+
+No userscript can guarantee challenge completion. Cloudflare and the site owner
+make the final clearance decision outside the userscript's execution context.
+
 ## User impact
 
 Confirmed impact:
