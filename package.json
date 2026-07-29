@@ -1,0 +1,9 @@
+{
+  "name": "animepahe-autonext-userscript",
+  "version": "2.0.11",
+  "private": true,
+  "description": "Release checks for the AnimePahe AutoNext Tampermonkey userscript",
+  "scripts": {
+    "test": "node --check animepahe-autonext-v2.user.js && node tests/antibot-guard.test.js"
+  }
+}
