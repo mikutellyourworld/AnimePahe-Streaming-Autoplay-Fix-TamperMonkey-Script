@@ -304,23 +304,50 @@ Use this section when another assistant, automation runner, or CI doc-bot needs 
 ### Badge missing
 
 1. Confirm URL matches supported domains.
-2. Confirm script enabled in Tampermonkey.
+2. Confirm the installed script metadata reports version 2.0.11 or newer. The
+   green Tampermonkey enabled switch does not display or prove the installed
+   version.
 3. Disable duplicate test scripts.
-4. If an anti-bot or unknown interstitial is visible, a missing badge is expected and confirms safe suspension.
+4. If an anti-bot or unknown interstitial is visible, a missing badge is
+   expected on the current release. On version 2.0.8, however,
+   `document-idle` can remain pending while a challenge never finishes loading,
+   so the missing badge alone does not prove that the fix is installed.
 
 ### Anti-bot verification loops or shows the AutoNext badge
 
-1. Confirm the installed script reports version 2.0.11 or newer in Tampermonkey.
-2. Refresh the AnimePahe tab once after saving or updating the userscript.
-3. During verification, confirm the `AutoNext ON` badge is absent. If it is absent, AutoNext is safely suspended and is not the remaining cause of the loop.
-4. In Brave, click the Shields lion for `animepahe.pw` and temporarily turn Shields down for that site, then reload. Brave documents that strict JavaScript/cookie blocking can break sites and supports per-site Shields changes.
-5. Confirm JavaScript and cookies are allowed for the site, temporarily disable other content-filtering/privacy extensions for this site, and retry without a VPN or proxy if one is active.
-6. If the loop persists, clear only `animepahe.pw` site data, reopen the site, and retain the displayed Cloudflare Ray ID for the site operator. Cloudflare lists network instability, browser configuration/extensions, unsupported browsers, disabled JavaScript, and detection errors as common challenge-loop causes.
-7. After verification succeeds, restore the preferred Shields setting one control at a time and confirm the badge appears on the real AnimePahe page.
+1. Open the canonical raw userscript and accept Tampermonkey's explicit
+   **Update/Reinstall** action.
+2. Confirm the installed script metadata reports version 2.0.11 or newer.
+3. In Brave, click the Shields lion for `animepahe.pw` and turn Shields down
+   for that site. Cloudflare does not support browser modifications to
+   fingerprinting APIs such as Canvas or WebGL, and Brave notes that its
+   fingerprinting protection can break some sites.
+4. Reload once and wait. Repeated refreshes restart verification and create a
+   new challenge session.
+5. If the loop persists, clear only `animepahe.pw` site data, reopen the site,
+   and allow a fresh clearance cookie.
+6. Test a clean current browser on the same network. If it succeeds, the
+   remaining fault is the original browser profile—not AnimePahe, DNS, the
+   network, or AutoNext. Use the successful browser or continue isolating the
+   failed profile; do not add simulated input or challenge automation to the
+   userscript.
+7. If every supported browser fails on multiple stable networks, retain the
+   displayed Cloudflare Ray ID for the site operator.
+8. Never copy clearance cookies, automate verification, replay challenge
+   tokens, or use headless bypass tools.
+
+In the documented 2026-07-29 incident, the installed version was updated to
+2.0.11, Brave Shields was disabled only for AnimePahe, the site's five cookies
+and site data were deleted, and one fresh verification was allowed to run for
+45 seconds. Brave still looped, while Edge InPrivate reached AnimePahe on the
+same machine and network. That result isolates the remaining fault to Brave's
+profile or Cloudflare's classification of that browser, outside this
+userscript. Challenge completion cannot be guaranteed by client-side code.
 
 Official troubleshooting references:
 
 - [Brave site-specific Shields settings](https://support.brave.com/hc/en-us/articles/360023646212-How-do-I-configure-global-and-site-specific-Shields-settings)
+- [Cloudflare supported browsers and extension limitations](https://developers.cloudflare.com/cloudflare-challenges/reference/supported-browsers/)
 - [Cloudflare challenge solve issues](https://developers.cloudflare.com/cloudflare-challenges/troubleshooting/challenge-solve-issues/)
 
 ## Tested Flow Example

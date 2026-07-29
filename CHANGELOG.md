@@ -15,6 +15,10 @@ All notable changes to this project are documented here.
 - Recorded the follow-up reproduction where verification remained stalled with the AutoNext badge absent and in a clean browser session without the userscript.
 - Split userscript isolation acceptance from Cloudflare challenge completion, which can still fail because of browser configuration, extensions, cookies, JavaScript, network conditions, or provider-side detection.
 - Added a Brave-specific recovery sequence based on official Brave and Cloudflare troubleshooting guidance.
+- Added the second follow-up RCA proving that Tampermonkey still had version 2.0.8 installed, Brave Shields fingerprinting remained enabled, and a clean Edge control reached AnimePahe on the same machine and network.
+- Clarified that Tampermonkey's green enabled switch and a missing badge do not prove that the fixed userscript version is installed.
+- Recorded the completed Brave recovery attempt: site-only Shields disabled, only AnimePahe's five cookies and site data deleted, and a single 45-second fresh challenge attempt that still looped while Edge succeeded.
+- Documented the final fault boundary: challenge acceptance is controlled by Cloudflare and the site owner, so the userscript must remain passive and cannot guarantee clearance.
 
 ## [2.0.10] - 2026-07-28
 
